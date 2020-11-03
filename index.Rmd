@@ -2,6 +2,7 @@
 title: "My awesome website"
 output: 
   html_document:
+    code_folding: hide
     toc: true
     toc_float: true
 ---
@@ -37,3 +38,18 @@ here's a Halloween pig:
 # Link to page within the site
 
 [about me](about.html)
+
+
+## Quarterly Results {.tabset}
+
+### By Product
+
+This is my first tab.
+
+### By Region
+
+This is my second tab.
+
+## This is a new section
+
+It's really great.
