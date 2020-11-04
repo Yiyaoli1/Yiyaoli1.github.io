@@ -2,6 +2,7 @@
 title: "Plotly examples"
 output: 
   html_document:
+    code_folding: hide
     toc: true
     toc_float: true
 ---
@@ -10,7 +11,7 @@ output:
 
 We are going to look at NYC Restaurant Inspection Results.
 
-```{r}
+```{r, warning=FALSE}
 library(tidyverse)
 library(httr)
 library(jsonlite)
@@ -55,7 +56,7 @@ nyc_inspections =
 
 ## Filter
 
-```{r}
+```{r, warning=FALSE}
 tidy_inspections =
 nyc_inspections %>%
   select(phone,cuisine_description,inspection_date,score,latitude,longitude,building) %>%
@@ -67,7 +68,7 @@ nyc_inspections %>%
 
 ## scatter plot
 
-```{r}
+```{r, warning=FALSE}
 tidy_inspections %>%
   mutate(text_label = str_c("Cuisine: ", cuisine_description, "\nScore: ", score, "\nNumber: ", phone)) %>% 
   
@@ -75,9 +76,9 @@ tidy_inspections %>%
     x = ~latitude, y = ~longitude, color = ~building, alpha = 0.5,text = ~text_label, type = "scatter", mode = "markers")
 ```
 
-## Boxplot
+## histogram plot
 
-```{r}
+```{r, warning=FALSE}
 tidy_inspections %>% 
   mutate(score = as.factor(score)) %>% 
   count(score) %>% 
@@ -89,7 +90,7 @@ tidy_inspections %>%
 
 ## Barplot
 
-```{r}
+```{r, warning=FALSE}
 tidy_inspections %>%
   count(building) %>% 
   plot_ly(x = ~building, y = ~n, color = ~n, type = "bar", colors = "viridis")
