@@ -6,7 +6,7 @@ navbar:
     - text: "About"
       href: about.html
     - text: "Dashboard"
-      href: plotly.html
+      href: dashboard.html
     - icon: fa-envelope github fa-lg
       href: http://github.com/Yiyaoli1/
 output:

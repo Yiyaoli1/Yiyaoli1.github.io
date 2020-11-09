@@ -1,0 +1,97 @@
+---
+title: "dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+
+```{r, message = FALSE, include = FALSE, warning=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(plotly)
+
+get_all_inspections = function(url) {
+  
+  all_inspections = vector("list", length = 0)
+  
+  loop_index = 1
+  chunk_size = 50000
+  DO_NEXT = TRUE
+  
+  while (DO_NEXT) {
+    message("Getting data, page ", loop_index)
+    
+    all_inspections[[loop_index]] = 
+      GET(url,
+          query = list(`$order` = "zipcode",
+                       `$limit` = chunk_size,
+                       `$offset` = as.integer((loop_index - 1) * chunk_size)
+                       )
+          ) %>%
+      content("text") %>%
+      fromJSON() %>%
+      as_tibble()
+    
+    DO_NEXT = dim(all_inspections[[loop_index]])[1] == chunk_size
+    loop_index = loop_index + 1
+  }
+  
+  all_inspections
+  
+}
+
+url = "https://data.cityofnewyork.us/resource/43nn-pn8j.json"
+
+nyc_inspections = 
+  get_all_inspections(url) %>%
+  bind_rows() 
+```
+
+## Filter
+
+```{r, message = FALSE, warning=FALSE}
+tidy_inspections =
+nyc_inspections %>%
+  select(phone,cuisine_description,inspection_date,score,latitude,longitude,building) %>%
+  filter(inspection_date == "2019-02-21T00:00:00.000")
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r, message = FALSE}
+tidy_inspections %>%
+  mutate(text_label = str_c("Cuisine: ", cuisine_description, "\nScore: ", score, "\nNumber: ", phone)) %>% 
+  
+  plot_ly(
+    x = ~latitude, y = ~longitude, color = ~building, alpha = 0.5,text = ~text_label, type = "scatter", mode = "markers")
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r, message = FALSE}
+tidy_inspections %>% 
+  mutate(score = as.factor(score)) %>% 
+  count(score) %>% 
+  mutate(
+    score = fct_reorder(score, n)) %>%  
+  
+  plot_ly(x = ~score, y = ~n, color = ~score, type = "box", colors = "viridis")
+```
+
+### Chart C
+
+```{r, message = FALSE}
+tidy_inspections %>%
+  count(building) %>% 
+  plot_ly(x = ~building, y = ~n, color = ~n, type = "bar", colors = "viridis")
+```
